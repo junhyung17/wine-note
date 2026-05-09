@@ -1,0 +1,34 @@
+# ============================================================
+# 파일: backend/requirements.txt
+# 역할: Django 백엔드에 필요한 Python 패키지 목록
+#       pip install -r requirements.txt 로 한 번에 설치
+# ============================================================
+
+# Django 웹 프레임워크 (핵심)
+Django==5.1.4
+
+# Django REST Framework: REST API를 쉽게 만들어주는 라이브러리
+# 역할: JSON 직렬화, 인증, 권한, API 라우팅
+djangorestframework==3.15.2
+
+# PostgreSQL 연결 드라이버
+# 역할: Python ↔ PostgreSQL 통신
+psycopg2-binary==2.9.9
+
+# CORS 헤더 처리 (React 프론트엔드가 다른 도메인에서 API 호출 허용)
+# Cross-Origin Resource Sharing
+django-cors-headers==4.6.0
+
+# Gunicorn: 프로덕션용 WSGI 서버
+# 역할: Django를 여러 Worker로 실행 (Nginx처럼 요청 처리)
+gunicorn==23.0.0
+
+# Whitenoise: Django가 정적 파일 직접 서빙
+# 역할: Nginx 없이 CSS/JS/이미지 파일을 Django가 직접 제공
+whitenoise==6.8.2
+
+# 환경변수 관리 (.env 파일 읽기)
+python-dotenv==1.0.1
+
+# Pillow: 이미지 처리 (와인 사진 업로드 시 필요)
+Pillow==11.0.0

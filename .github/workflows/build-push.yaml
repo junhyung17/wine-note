@@ -1,0 +1,74 @@
+# ============================================================
+# 파일: .github/workflows/build-push.yaml
+# 역할: backend/ 코드가 main 브랜치에 push되면
+#       Docker 이미지를 자동으로 빌드해서 ghcr.io에 올림
+#
+# 실행 시점: git push origin main (backend/ 파일 변경 시에만)
+# 결과: ghcr.io/junhyung17/wine-note:latest 이미지 업데이트
+# 이후: ArgoCD가 K8S에서 새 이미지로 자동 재배포
+# ============================================================
+name: Build and Push Wine Note Image
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'          # backend/ 폴더 변경 시에만 실행
+      - '.github/workflows/**' # 워크플로우 자체 변경 시에도 실행
+
+jobs:
+  build-and-push:
+    name: Build Docker Image & Push to ghcr.io
+    runs-on: ubuntu-latest
+
+    # 이 job이 필요한 GitHub 권한
+    permissions:
+      contents: read      # 코드 읽기
+      packages: write     # ghcr.io에 이미지 push
+
+    steps:
+      # 1. 코드 가져오기
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      # 2. Docker 빌드 성능 향상을 위한 QEMU 설정 (멀티 아키텍처 빌드용)
+      - name: QEMU 설정
+        uses: docker/setup-qemu-action@v3
+
+      # 3. Docker BuildKit 활성화 (빌드 캐시, 병렬 빌드 지원)
+      - name: Docker Buildx 설정
+        uses: docker/setup-buildx-action@v3
+
+      # 4. GitHub Container Registry 로그인
+      #    secrets.GITHUB_TOKEN은 GitHub이 자동으로 제공 (별도 설정 불필요)
+      - name: ghcr.io 로그인
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}          # GitHub 사용자명 (junhyung17)
+          password: ${{ secrets.GITHUB_TOKEN }}  # 자동 제공 토큰
+
+      # 5. Docker 이미지 빌드 & Push
+      - name: 이미지 빌드 및 Push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend          # Dockerfile이 있는 경로
+          push: true                  # 빌드 후 레지스트리에 push
+          tags: |
+            ghcr.io/junhyung17/wine-note:latest
+            ghcr.io/junhyung17/wine-note:${{ github.sha }}
+          # GitHub SHA 태그 추가로 특정 커밋의 이미지를 항상 참조 가능
+
+          # 빌드 캐시 활용 (다음 빌드를 빠르게)
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # 6. 빌드 결과 요약 (GitHub Actions 탭에서 확인 가능)
+      - name: 배포 요약
+        run: |
+          echo "## 🍷 Wine Note 이미지 빌드 완료" >> $GITHUB_STEP_SUMMARY
+          echo "- **이미지**: ghcr.io/junhyung17/wine-note:latest" >> $GITHUB_STEP_SUMMARY
+          echo "- **커밋**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **시간**: $(date '+%Y-%m-%d %H:%M:%S')" >> $GITHUB_STEP_SUMMARY
+          echo "- **ArgoCD**: wine-manifest 변경 없이 자동 재배포 트리거 필요" >> $GITHUB_STEP_SUMMARY
