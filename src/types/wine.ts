@@ -1,7 +1,7 @@
 export type WineColor = 'red' | 'white' | 'rosé' | 'sparkling' | 'dessert' | 'fortified' | 'orange';
 
 export interface WineNote {
-  id: string;
+  id: number;
   // 기본 정보
   producer: string;
   name: string;

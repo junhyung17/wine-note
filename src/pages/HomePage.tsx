@@ -128,7 +128,7 @@ export default function HomePage() {
   const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setWines(getWines());
+    getWines().then(setWines).catch(console.error);
   }, []);
 
   useEffect(() => {

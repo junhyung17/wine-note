@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeftIcon, PencilIcon, TrashIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { type WineNote } from '../types/wine';
-import { getWineById, deleteWine } from '../store/wineStore';
+import { fetchWine, deleteWine } from '../api/wineApi';
 import WineColorBadge from '../components/WineColorBadge';
 import StarRating from '../components/StarRating';
 
@@ -49,8 +49,7 @@ export default function WineDetailPage() {
 
   useEffect(() => {
     if (id) {
-      const found = getWineById(id);
-      setWine(found ?? null);
+      fetchWine(Number(id)).then(setWine).catch(() => setWine(null));
     }
   }, [id]);
 
@@ -64,8 +63,7 @@ export default function WineDetailPage() {
 
   function handleDelete() {
     if (!id) return;
-    deleteWine(id);
-    navigate('/');
+    deleteWine(Number(id)).then(() => navigate('/'));
   }
 
   function formatPrice(price: string, currency: string) {

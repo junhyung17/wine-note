@@ -2,7 +2,7 @@ import { useState, useEffect, type ChangeEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { type WineColor, type WineFormData, COLOR_LABELS, NOSE_DESCRIPTORS, PALATE_DESCRIPTORS, FOOD_PAIRING_OPTIONS } from '../types/wine';
-import { addWine, updateWine, getWineById } from '../store/wineStore';
+import { createWine, updateWine, fetchWine } from '../api/wineApi';
 import StarRating from '../components/StarRating';
 import TagInput from '../components/TagInput';
 import PhotoUpload from '../components/PhotoUpload';
@@ -67,11 +67,12 @@ export default function WineFormPage() {
 
   useEffect(() => {
     if (id) {
-      const wine = getWineById(id);
-      if (wine) {
-        const { id: _id, createdAt: _c, updatedAt: _u, ...formData } = wine;
-        setForm(formData);
-      }
+      fetchWine(Number(id))
+        .then((wine) => {
+          const { id: _id, createdAt: _c, updatedAt: _u, ...formData } = wine;
+          setForm(formData);
+        })
+        .catch(console.error);
     }
   }, [id]);
 
@@ -89,9 +90,9 @@ export default function WineFormPage() {
     setSaving(true);
     try {
       if (isEdit && id) {
-        updateWine(id, form);
+        await updateWine(Number(id), form);
       } else {
-        addWine(form);
+        await createWine(form);
       }
       navigate('/');
     } finally {
