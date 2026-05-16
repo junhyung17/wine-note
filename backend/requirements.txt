@@ -32,3 +32,6 @@ python-dotenv==1.0.1
 
 # Pillow: 이미지 처리 (와인 사진 업로드 시 필요)
 Pillow==11.0.0
+
+# DATABASE_URL 환경변수 파싱 (Railway 등 클라우드 플랫폼용)
+dj-database-url==2.3.0

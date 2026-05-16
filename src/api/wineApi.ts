@@ -1,5 +1,7 @@
 import { type WineNote, type WineFormData } from '../types/wine';
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '';
+
 interface ApiWine {
   id: number;
   producer: string;
@@ -89,17 +91,17 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
 }
 
 export async function fetchWines(): Promise<WineNote[]> {
-  const data = await request<{ results: ApiWine[] }>('/api/wines/?ordering=-date_tasted,-created_at');
+  const data = await request<{ results: ApiWine[] }>(`${API_BASE}/api/wines/?ordering=-date_tasted,-created_at`);
   return data.results.map(fromApi);
 }
 
 export async function fetchWine(id: number): Promise<WineNote> {
-  const data = await request<ApiWine>(`/api/wines/${id}/`);
+  const data = await request<ApiWine>(`${API_BASE}/api/wines/${id}/`);
   return fromApi(data);
 }
 
 export async function createWine(formData: WineFormData): Promise<WineNote> {
-  const data = await request<ApiWine>('/api/wines/', {
+  const data = await request<ApiWine>(`${API_BASE}/api/wines/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(toApi(formData)),
@@ -108,7 +110,7 @@ export async function createWine(formData: WineFormData): Promise<WineNote> {
 }
 
 export async function updateWine(id: number, formData: WineFormData): Promise<WineNote> {
-  const data = await request<ApiWine>(`/api/wines/${id}/`, {
+  const data = await request<ApiWine>(`${API_BASE}/api/wines/${id}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(toApi(formData)),
@@ -117,5 +119,5 @@ export async function updateWine(id: number, formData: WineFormData): Promise<Wi
 }
 
 export async function deleteWine(id: number): Promise<void> {
-  await request<void>(`/api/wines/${id}/`, { method: 'DELETE' });
+  await request<void>(`${API_BASE}/api/wines/${id}/`, { method: 'DELETE' });
 }

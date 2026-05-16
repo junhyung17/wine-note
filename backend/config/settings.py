@@ -6,6 +6,7 @@
 """
 import os
 import logging
+import dj_database_url
 
 # ============================================================
 # 기본 설정
@@ -81,18 +82,22 @@ WSGI_APPLICATION = 'config.wsgi.application'  # Gunicorn이 호출하는 WSGI �
 
 # ============================================================
 # 데이터베이스 설정 (PostgreSQL)
-# K8S ConfigMap/Secret에서 환경변수로 주입
+# Railway: DATABASE_URL 환경변수 한 줄로 주입
+# K8S: 개별 DB_* 환경변수로 주입
 # ============================================================
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',  # PostgreSQL 드라이버 사용
-        'NAME': os.environ.get('DB_NAME', 'winedb'),
-        'USER': os.environ.get('DB_USER', 'wineuser'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', ''),   # Secret에서 주입
-        'HOST': os.environ.get('DB_HOST', 'localhost'),  # K8S: wine-db-svc
-        'PORT': os.environ.get('DB_PORT', '5432'),
+if _db_url := os.environ.get('DATABASE_URL'):
+    DATABASES = {'default': dj_database_url.parse(_db_url, conn_max_age=600)}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_NAME', 'winedb'),
+            'USER': os.environ.get('DB_USER', 'wineuser'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
+        }
     }
-}
 
 # ============================================================
 # 비밀번호 유효성 검사 (사용자 계정용)
@@ -150,7 +155,7 @@ REST_FRAMEWORK = {
 }
 
 # ============================================================
-# CORS 설정 (React 프론트엔드가 API 호출 허용)
+# CORS / CSRF 설정 (React 프론트엔드가 API 호출 허용)
 # ============================================================
 CORS_ALLOWED_ORIGINS = os.environ.get(
     'CORS_ALLOWED_ORIGINS', 'http://localhost:5173'
@@ -158,6 +163,14 @@ CORS_ALLOWED_ORIGINS = os.environ.get(
 
 # 개발 환경에서는 모든 origin 허용 (프로덕션에서는 False)
 CORS_ALLOW_ALL_ORIGINS = DEBUG
+
+# Railway/Vercel 등 HTTPS 환경에서 CSRF 허용 도메인
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    'CSRF_TRUSTED_ORIGINS', 'http://localhost:5173'
+).split(',')
+
+# Railway는 리버스 프록시 뒤에서 실행되므로 HTTPS 여부를 헤더로 판단
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # ============================================================
 # 로깅 설정 (인프라 에이전트 및 사용자 모니터링용)
