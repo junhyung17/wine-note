@@ -157,12 +157,13 @@ REST_FRAMEWORK = {
 # ============================================================
 # CORS / CSRF 설정 (React 프론트엔드가 API 호출 허용)
 # ============================================================
-CORS_ALLOWED_ORIGINS = os.environ.get(
-    'CORS_ALLOWED_ORIGINS', 'http://localhost:5173'
-).split(',')
+CORS_ALLOWED_ORIGINS = [
+    o.strip() for o in os.environ.get(
+        'CORS_ALLOWED_ORIGINS', 'http://localhost:5173'
+    ).split(',') if o.strip()
+]
 
-# 개발 환경에서는 모든 origin 허용 (프로덕션에서는 False)
-CORS_ALLOW_ALL_ORIGINS = DEBUG
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Railway/Vercel 등 HTTPS 환경에서 CSRF 허용 도메인
 CSRF_TRUSTED_ORIGINS = os.environ.get(
