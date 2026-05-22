@@ -9,7 +9,7 @@ export interface WineNote {
   color: WineColor;
   region: string;
   country: string;
-  grape: string;
+  grape: string[];
   // 테이스팅 노트
   appearance: string;
   nose: string[];

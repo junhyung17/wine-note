@@ -5,6 +5,7 @@ import { type WineColor, type WineFormData, COLOR_LABELS, NOSE_DESCRIPTORS, PALA
 import { createWine, updateWine, fetchWine } from '../api/wineApi';
 import StarRating from '../components/StarRating';
 import TagInput from '../components/TagInput';
+import GrapeInput from '../components/GrapeInput';
 import PhotoUpload from '../components/PhotoUpload';
 
 const COLORS: WineColor[] = ['red', 'white', 'rosé', 'sparkling', 'orange', 'dessert', 'fortified'];
@@ -14,7 +15,7 @@ const COLOR_EMOJIS: Record<WineColor, string> = {
 
 const defaultForm: WineFormData = {
   producer: '', name: '', vintage: '', color: 'red',
-  region: '', country: '', grape: '',
+  region: '', country: '', grape: [],
   appearance: '', nose: [], palate: [], finish: '',
   myRating: 0, vivinoRating: '',
   price: '', currency: 'KRW', purchaseLocation: '', wineSearcherPrice: '',
@@ -192,10 +193,11 @@ export default function WineFormPage() {
             </div>
 
             <Field label="포도 품종">
-              <Input
-                value={form.grape}
-                onChange={handleText('grape')}
-                placeholder="Cabernet Sauvignon, Merlot"
+              <GrapeInput
+                grapes={form.grape}
+                onChange={(grapes) => set('grape', grapes)}
+                wineColor={form.color}
+                country={form.country}
               />
             </Field>
 

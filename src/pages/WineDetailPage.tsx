@@ -159,7 +159,7 @@ export default function WineDetailPage() {
           <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
             <InfoItem label="국가" value={wine.country} />
             <InfoItem label="지역" value={wine.region} />
-            <InfoItem label="포도 품종" value={wine.grape} />
+            <InfoItem label="포도 품종" value={wine.grape.join(', ')} />
             <InfoItem label="시음일" value={wine.dateTasted ? new Date(wine.dateTasted).toLocaleDateString('ko-KR') : undefined} />
           </dl>
         </section>
