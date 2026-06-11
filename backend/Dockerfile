@@ -48,4 +48,4 @@ EXPOSE 8000
 # -b 0.0.0.0:8000: 모든 인터페이스의 8000 포트에서 수신
 # config.wsgi:application: Django WSGI 앱
 # Railway는 $PORT를 동적으로 주입함. 로컬/K8S 기본값은 8000
-CMD sh -c "gunicorn --workers 2 --bind 0.0.0.0:${PORT:-8000} --access-logfile - --error-logfile - config.wsgi:application"
+CMD sh -c "python manage.py migrate && gunicorn --workers 2 --bind 0.0.0.0:${PORT:-8000} --access-logfile - --error-logfile - config.wsgi:application"
