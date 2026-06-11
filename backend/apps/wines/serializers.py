@@ -19,10 +19,9 @@ class WineNoteSerializer(serializers.ModelSerializer):
     """
 
     class Meta:
-        model = WineNote        # 변환할 모델
-        fields = '__all__'      # 모든 필드 포함
+        model = WineNote
+        exclude = ['user']      # user는 views.perform_create에서 자동 설정, API 노출 불필요
         read_only_fields = ['id', 'created_at', 'updated_at']
-        # id, created_at, updated_at은 자동 생성이므로 API 입력에서 제외
 
     def validate_my_rating(self, value):
         """

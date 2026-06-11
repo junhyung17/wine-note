@@ -8,6 +8,7 @@ Django ORM이 이 클래스를 보고 SQL 테이블을 자동으로 생성함
 """
 import logging
 from django.db import models
+from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 # 이 모듈의 로거 (설정은 settings.py의 LOGGING에서)
@@ -34,6 +35,18 @@ class WineNote(models.Model):
         ('fortified', '주정강화'),
         ('orange', '오렌지'),
     ]
+
+    # ========================================================
+    # 소유자 (로그인한 사용자)
+    # ========================================================
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        null=True,   # 마이그레이션 전 기존 레코드 호환
+        blank=True,
+        related_name='wine_notes',
+        verbose_name='사용자',
+    )
 
     # ========================================================
     # 기본 정보 (Basic Info)

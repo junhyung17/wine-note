@@ -34,4 +34,7 @@ urlpatterns = [
 
     # 와인 노트 API (http://wine.homelab/api/wines/)
     path('api/', include('apps.wines.urls')),
+
+    # 인증 API (http://wine.homelab/auth/)
+    path('auth/', include('apps.accounts.urls')),
 ]

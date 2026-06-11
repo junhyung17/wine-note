@@ -85,7 +85,7 @@ function toApi(d: WineFormData): Record<string, unknown> {
 }
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(url, options);
+  const res = await fetch(url, { ...options, credentials: 'include' });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   return res.status === 204 ? (undefined as T) : res.json();
 }

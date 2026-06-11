@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PlusIcon, MagnifyingGlassIcon, Squares2X2Icon, ListBulletIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, MagnifyingGlassIcon, Squares2X2Icon, ListBulletIcon, ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline';
 import { type WineNote, type WineColor, COLOR_LABELS } from '../types/wine';
 import { getWines } from '../store/wineStore';
+import { useAuth } from '../context/AuthContext';
 import WineColorBadge from '../components/WineColorBadge';
 import StarRating from '../components/StarRating';
 
@@ -97,7 +98,7 @@ function WineRow({ wine, onClick }: { wine: WineNote; onClick: () => void }) {
         </div>
         <p className="text-xs text-gray-500 mt-0.5">
           {[wine.country, wine.region].filter(Boolean).join(' · ')}
-          {wine.grape && ` · ${wine.grape}`}
+          {wine.grape.length > 0 && ` · ${wine.grape.join(', ')}`}
         </p>
         {wine.nose.length > 0 && (
           <p className="text-xs text-gray-600 mt-0.5 truncate">{wine.nose.join(', ')}</p>
@@ -119,6 +120,7 @@ function WineRow({ wine, onClick }: { wine: WineNote; onClick: () => void }) {
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [wines, setWines] = useState<WineNote[]>([]);
   const [search, setSearch] = useState('');
   const [filterColor, setFilterColor] = useState<WineColor | 'all'>('all');
@@ -149,7 +151,7 @@ export default function HomePage() {
           w.producer.toLowerCase().includes(q) ||
           w.region.toLowerCase().includes(q) ||
           w.country.toLowerCase().includes(q) ||
-          w.grape.toLowerCase().includes(q)
+          w.grape.some((g) => g.toLowerCase().includes(q))
         );
       })
     : wines;
@@ -176,13 +178,25 @@ export default function HomePage() {
               </h1>
               <p className="text-xs text-gray-500">{wines.length}개의 와인 기록</p>
             </div>
-            <button
-              onClick={() => navigate('/add')}
-              className="flex items-center gap-1.5 bg-[#8f1c39] hover:bg-[#ab1e3f] text-white text-sm font-medium px-3 py-2 rounded-lg transition-colors"
-            >
-              <PlusIcon className="w-4 h-4" />
-              기록 추가
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigate('/add')}
+                className="flex items-center gap-1.5 bg-[#8f1c39] hover:bg-[#ab1e3f] text-white text-sm font-medium px-3 py-2 rounded-lg transition-colors"
+              >
+                <PlusIcon className="w-4 h-4" />
+                기록 추가
+              </button>
+              <div className="flex items-center gap-1.5 pl-1">
+                <span className="text-xs text-gray-500 max-w-[80px] truncate hidden sm:block">{user?.name}</span>
+                <button
+                  onClick={logout}
+                  title="로그아웃"
+                  className="p-1.5 rounded-lg hover:bg-[#1a0f13] text-gray-500 hover:text-gray-300 transition-colors"
+                >
+                  <ArrowRightStartOnRectangleIcon className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* 검색 */}

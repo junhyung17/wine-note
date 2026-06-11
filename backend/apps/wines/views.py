@@ -25,10 +25,9 @@ logger = logging.getLogger(__name__)
 class WineNoteListCreateView(generics.ListCreateAPIView):
     """
     역할: 와인 노트 목록 조회 + 새 노트 생성
-    GET  /api/wines/ → 전체 목록 반환 (간략 형식)
-    POST /api/wines/ → 새 와인 노트 생성
+    GET  /api/wines/ → 로그인 사용자 본인 목록 반환
+    POST /api/wines/ → 새 와인 노트 생성 (자동으로 현재 사용자 귀속)
     """
-    queryset = WineNote.objects.all()
 
     # 검색 기능: /api/wines/?search=보르도
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -46,14 +45,13 @@ class WineNoteListCreateView(generics.ListCreateAPIView):
             return WineNoteListSerializer
         return WineNoteSerializer
 
+    def perform_create(self, serializer):
+        """새 와인 노트에 현재 로그인 사용자를 자동으로 연결."""
+        serializer.save(user=self.request.user)
+
     def get_queryset(self):
-        """
-        역할: 목록 조회 시 필터링 적용
-              ?color=red    → 레드 와인만
-              ?country=France → 프랑스 와인만
-              ?search=보르도 → 보르도 검색
-        """
-        queryset = WineNote.objects.all()
+        """로그인 사용자 본인 와인 노트만 반환."""
+        queryset = WineNote.objects.filter(user=self.request.user)
 
         # 색상 필터 (?color=red)
         color = self.request.query_params.get('color')
@@ -95,14 +93,12 @@ class WineNoteListCreateView(generics.ListCreateAPIView):
 
 class WineNoteDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
-    역할: 특정 와인 노트의 조회, 수정, 삭제
-    GET    /api/wines/{id}/ → 상세 조회
-    PUT    /api/wines/{id}/ → 전체 수정
-    PATCH  /api/wines/{id}/ → 부분 수정
-    DELETE /api/wines/{id}/ → 삭제
+    역할: 특정 와인 노트의 조회, 수정, 삭제 (본인 소유만 접근 가능)
     """
-    queryset = WineNote.objects.all()
     serializer_class = WineNoteSerializer
+
+    def get_queryset(self):
+        return WineNote.objects.filter(user=self.request.user)
 
     def retrieve(self, request, *args, **kwargs):
         """역할: 특정 와인 노트 상세 조회"""

@@ -6,6 +6,7 @@
 """
 import os
 import logging
+from datetime import timedelta
 import dj_database_url
 
 # ============================================================
@@ -36,10 +37,12 @@ INSTALLED_APPS = [
 
     # 서드파티 앱
     'rest_framework',                # Django REST Framework (API 구축)
+    'rest_framework_simplejwt',      # JWT 토큰 인증
     'corsheaders',                   # CORS 헤더 (React 프론트엔드 허용)
 
     # 우리가 만든 앱
     'apps.wines',                    # 와인 노트 앱
+    'apps.accounts',                 # 계정/인증 앱
 ]
 
 # ============================================================
@@ -137,22 +140,44 @@ MEDIA_ROOT = os.path.join(os.path.dirname(__file__), '..', 'media')
 # Django REST Framework 설정
 # ============================================================
 REST_FRAMEWORK = {
-    # 기본 인증 방식 (나중에 JWT 토큰 인증으로 교체 가능)
+    # httpOnly 쿠키에서 JWT를 읽어 인증
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
+        'apps.accounts.authentication.CookieJWTAuthentication',
     ],
-    # 기본 권한: 지금은 누구나 접근 가능 (나중에 IsAuthenticated로 변경)
+    # 로그인한 사용자만 API 접근 가능
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ],
-    # 응답 형식: JSON
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
     ],
-    # 페이지네이션: 한 번에 50개씩 반환
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 50,
 }
+
+# ============================================================
+# JWT 설정
+# ============================================================
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+# ============================================================
+# Google OAuth 설정
+# ============================================================
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
+
+# ============================================================
+# 쿠키 설정 (환경별로 다르게 설정)
+# Railway(HTTPS): COOKIE_SECURE=True, COOKIE_SAMESITE=None
+# K8S/로컬(HTTP): COOKIE_SECURE=False, COOKIE_SAMESITE=Lax
+# ============================================================
+COOKIE_SECURE = os.environ.get('COOKIE_SECURE', 'False') == 'True'
+COOKIE_SAMESITE = os.environ.get('COOKIE_SAMESITE', 'None' if COOKIE_SECURE else 'Lax')
 
 # ============================================================
 # CORS / CSRF 설정 (React 프론트엔드가 API 호출 허용)
@@ -163,7 +188,9 @@ CORS_ALLOWED_ORIGINS = [
     ).split(',') if o.strip()
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
+# credentials(쿠키) 포함 요청 허용 — CORS_ALLOW_ALL_ORIGINS와 동시에 True 불가
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False
 
 # Railway/Vercel 등 HTTPS 환경에서 CSRF 허용 도메인
 CSRF_TRUSTED_ORIGINS = os.environ.get(

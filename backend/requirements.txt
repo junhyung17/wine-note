@@ -35,3 +35,9 @@ Pillow==11.0.0
 
 # DATABASE_URL 환경변수 파싱 (Railway 등 클라우드 플랫폼용)
 dj-database-url==2.3.0
+
+# Google OAuth ID 토큰 검증
+google-auth==2.37.0
+
+# JWT 토큰 발급/검증
+djangorestframework-simplejwt==5.4.0
