@@ -11,10 +11,23 @@ interface ApiWine {
   region: string;
   country: string;
   grape: string;
+  abv: number | null;
   appearance: string;
+  appearance_intensity: string;
+  appearance_color: string;
+  nose_intensity: string;
   nose: string[];
+  sweetness: string;
+  acidity: string;
+  tannin: string;
+  alcohol_level: string;
+  body: string;
+  flavour_intensity: string;
   palate: string[];
+  finish_length: string;
   finish: string;
+  quality: string;
+  ageing: string;
   my_rating: number;
   vivino_rating: string;
   price: string;
@@ -39,10 +52,23 @@ function fromApi(d: ApiWine): WineNote {
     region: d.region ?? '',
     country: d.country ?? '',
     grape: (d.grape ?? '').split(',').map((s) => s.trim()).filter(Boolean),
+    abv: d.abv ?? null,
     appearance: d.appearance ?? '',
+    appearanceIntensity: (d.appearance_intensity ?? '') as WineNote['appearanceIntensity'],
+    appearanceColor: d.appearance_color ?? '',
+    noseIntensity: (d.nose_intensity ?? '') as WineNote['noseIntensity'],
     nose: d.nose ?? [],
+    sweetness: (d.sweetness ?? '') as WineNote['sweetness'],
+    acidity: (d.acidity ?? '') as WineNote['acidity'],
+    tannin: (d.tannin ?? '') as WineNote['tannin'],
+    alcoholLevel: (d.alcohol_level ?? '') as WineNote['alcoholLevel'],
+    body: (d.body ?? '') as WineNote['body'],
+    flavourIntensity: (d.flavour_intensity ?? '') as WineNote['flavourIntensity'],
     palate: d.palate ?? [],
+    finishLength: (d.finish_length ?? '') as WineNote['finishLength'],
     finish: d.finish ?? '',
+    quality: (d.quality ?? '') as WineNote['quality'],
+    ageing: d.ageing ?? '',
     myRating: d.my_rating ?? 0,
     vivinoRating: d.vivino_rating ?? '',
     price: d.price ?? '',
@@ -67,10 +93,23 @@ function toApi(d: WineFormData): Record<string, unknown> {
     region: d.region,
     country: d.country,
     grape: d.grape.join(', '),
+    abv: d.abv,
     appearance: d.appearance,
+    appearance_intensity: d.appearanceIntensity,
+    appearance_color: d.appearanceColor,
+    nose_intensity: d.noseIntensity,
     nose: d.nose,
+    sweetness: d.sweetness,
+    acidity: d.acidity,
+    tannin: d.tannin,
+    alcohol_level: d.alcoholLevel,
+    body: d.body,
+    flavour_intensity: d.flavourIntensity,
     palate: d.palate,
+    finish_length: d.finishLength,
     finish: d.finish,
+    quality: d.quality,
+    ageing: d.ageing,
     my_rating: d.myRating,
     vivino_rating: d.vivinoRating,
     price: d.price,

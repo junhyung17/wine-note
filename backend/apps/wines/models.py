@@ -188,6 +188,71 @@ class WineNote(models.Model):
     )
 
     # ========================================================
+    # 외관 구조화
+    # ========================================================
+    APPEARANCE_INTENSITY_CHOICES = [('pale', 'Pale'), ('medium', 'Medium'), ('deep', 'Deep')]
+    appearance_intensity = models.CharField(
+        max_length=20, blank=True, choices=APPEARANCE_INTENSITY_CHOICES, verbose_name='외관 강도'
+    )
+    appearance_color = models.CharField(
+        max_length=50, blank=True, verbose_name='외관 색상 표현'
+    )
+
+    # ========================================================
+    # 향 강도
+    # ========================================================
+    INTENSITY_CHOICES = [('light', 'Light'), ('medium', 'Medium'), ('pronounced', 'Pronounced')]
+    nose_intensity = models.CharField(
+        max_length=20, blank=True, choices=INTENSITY_CHOICES, verbose_name='향 강도'
+    )
+
+    # ========================================================
+    # 구조감 (Structure)
+    # ========================================================
+    SWEETNESS_CHOICES = [
+        ('dry', 'Dry'), ('off-dry', 'Off-dry'), ('medium-dry', 'Medium Dry'),
+        ('medium-sweet', 'Medium Sweet'), ('sweet', 'Sweet'), ('luscious', 'Luscious'),
+    ]
+    sweetness = models.CharField(max_length=20, blank=True, choices=SWEETNESS_CHOICES, verbose_name='당도')
+
+    ACIDITY_CHOICES = [('low', 'Low'), ('medium', 'Medium'), ('high', 'High')]
+    acidity = models.CharField(max_length=20, blank=True, choices=ACIDITY_CHOICES, verbose_name='산도')
+
+    TANNIN_CHOICES = [('low', 'Low'), ('medium', 'Medium'), ('high', 'High')]
+    tannin = models.CharField(max_length=20, blank=True, choices=TANNIN_CHOICES, verbose_name='타닌')
+
+    ALCOHOL_CHOICES = [('low', 'Low'), ('medium', 'Medium'), ('high', 'High')]
+    alcohol_level = models.CharField(max_length=20, blank=True, choices=ALCOHOL_CHOICES, verbose_name='알코올')
+
+    BODY_CHOICES = [('light', 'Light'), ('medium', 'Medium'), ('full', 'Full')]
+    body = models.CharField(max_length=20, blank=True, choices=BODY_CHOICES, verbose_name='바디')
+
+    flavour_intensity = models.CharField(
+        max_length=20, blank=True, choices=INTENSITY_CHOICES, verbose_name='풍미 강도'
+    )
+
+    # ========================================================
+    # 여운 길이
+    # ========================================================
+    FINISH_LENGTH_CHOICES = [('short', 'Short'), ('medium', 'Medium'), ('long', 'Long')]
+    finish_length = models.CharField(
+        max_length=20, blank=True, choices=FINISH_LENGTH_CHOICES, verbose_name='여운 길이'
+    )
+
+    # ========================================================
+    # 종합 평가
+    # ========================================================
+    QUALITY_CHOICES = [
+        ('acceptable', 'Acceptable'), ('good', 'Good'),
+        ('very-good', 'Very Good'), ('outstanding', 'Outstanding'),
+    ]
+    quality = models.CharField(max_length=20, blank=True, choices=QUALITY_CHOICES, verbose_name='품질')
+    ageing = models.CharField(max_length=100, blank=True, verbose_name='숙성 가능성')
+
+    # 알코올 도수 (%)
+    abv = models.FloatField(null=True, blank=True, verbose_name='알코올 도수 (%)')
+
+    # ========================================================
     # 기타 정보
     # ========================================================
 

@@ -1,7 +1,13 @@
 import { useState, useEffect, type ChangeEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import { type WineColor, type WineFormData, COLOR_LABELS, NOSE_DESCRIPTORS, PALATE_DESCRIPTORS, FOOD_PAIRING_OPTIONS } from '../types/wine';
+import {
+  type WineColor, type WineFormData,
+  COLOR_LABELS, NOSE_DESCRIPTORS, PALATE_DESCRIPTORS, FOOD_PAIRING_OPTIONS,
+  APPEARANCE_INTENSITY_OPTIONS, NOSE_INTENSITY_OPTIONS, SWEETNESS_OPTIONS,
+  ACIDITY_OPTIONS, TANNIN_OPTIONS, ALCOHOL_OPTIONS, BODY_OPTIONS,
+  FLAVOUR_INTENSITY_OPTIONS, FINISH_LENGTH_OPTIONS, QUALITY_OPTIONS,
+} from '../types/wine';
 import { createWine, updateWine, fetchWine } from '../api/wineApi';
 import StarRating from '../components/StarRating';
 import TagInput from '../components/TagInput';
@@ -16,7 +22,13 @@ const COLOR_EMOJIS: Record<WineColor, string> = {
 const defaultForm: WineFormData = {
   producer: '', name: '', vintage: '', color: 'red',
   region: '', country: '', grape: [],
-  appearance: '', nose: [], palate: [], finish: '',
+  abv: null,
+  appearance: '', appearanceIntensity: '', appearanceColor: '',
+  noseIntensity: '', nose: [],
+  sweetness: '', acidity: '', tannin: '', alcoholLevel: '', body: '', flavourIntensity: '',
+  palate: [],
+  finishLength: '', finish: '',
+  quality: '', ageing: '',
   myRating: 0, vivinoRating: '',
   price: '', currency: 'KRW', purchaseLocation: '', wineSearcherPrice: '',
   foodPairing: [], photos: [], notes: '',
@@ -55,6 +67,39 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
     <h2 className="text-base font-semibold text-[#d4af6a] border-b border-[#2a1520] pb-2 mb-4">
       {children}
     </h2>
+  );
+}
+
+function ScaleSelect<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: T | '';
+  options: { value: T; label: string }[];
+  onChange: (v: T | '') => void;
+}) {
+  return (
+    <Field label={label}>
+      <div className="flex flex-wrap gap-2">
+        {options.map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onChange(value === opt.value ? '' : opt.value)}
+            className={`px-3 py-1.5 rounded-lg text-sm transition-all border ${
+              value === opt.value
+                ? 'bg-[#8f1c39] text-white border-[#cc2a4e]'
+                : 'bg-[#1a0f13] text-gray-400 border-[#3d1f2a] hover:border-[#8f1c39] hover:text-gray-200'
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    </Field>
   );
 }
 
@@ -201,13 +246,26 @@ export default function WineFormPage() {
               />
             </Field>
 
-            <Field label="시음일">
-              <Input
-                type="date"
-                value={form.dateTasted}
-                onChange={handleText('dateTasted')}
-              />
-            </Field>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="알코올 도수 (%)">
+                <Input
+                  type="number"
+                  value={form.abv ?? ''}
+                  onChange={(e) => set('abv', e.target.value === '' ? null : Number(e.target.value))}
+                  placeholder="13.5"
+                  step="0.1"
+                  min="0"
+                  max="25"
+                />
+              </Field>
+              <Field label="시음일">
+                <Input
+                  type="date"
+                  value={form.dateTasted}
+                  onChange={handleText('dateTasted')}
+                />
+              </Field>
+            </div>
           </div>
         </section>
 
@@ -215,14 +273,35 @@ export default function WineFormPage() {
         <section>
           <SectionTitle>테이스팅 노트</SectionTitle>
           <div className="space-y-4">
-            <Field label="외관 (색상, 투명도)">
-              <Input
-                value={form.appearance}
-                onChange={handleText('appearance')}
-                placeholder="딥 루비, 맑고 투명한"
-              />
-            </Field>
+            <ScaleSelect
+              label="외관 강도"
+              value={form.appearanceIntensity}
+              options={APPEARANCE_INTENSITY_OPTIONS}
+              onChange={(v) => set('appearanceIntensity', v)}
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="외관 색상 표현">
+                <Input
+                  value={form.appearanceColor}
+                  onChange={handleText('appearanceColor')}
+                  placeholder="딥 루비, 밝은 레몬 옐로"
+                />
+              </Field>
+              <Field label="외관 (투명도 등)">
+                <Input
+                  value={form.appearance}
+                  onChange={handleText('appearance')}
+                  placeholder="맑고 투명한, 약간의 침전"
+                />
+              </Field>
+            </div>
 
+            <ScaleSelect
+              label="향 강도 (Nose Intensity)"
+              value={form.noseIntensity}
+              options={NOSE_INTENSITY_OPTIONS}
+              onChange={(v) => set('noseIntensity', v)}
+            />
             <TagInput
               label="향 (아로마/부케)"
               tags={form.nose}
@@ -239,11 +318,80 @@ export default function WineFormPage() {
               placeholder="맛을 입력하거나 선택하세요"
             />
 
-            <Field label="피니시">
+            <ScaleSelect
+              label="여운 길이 (Finish Length)"
+              value={form.finishLength}
+              options={FINISH_LENGTH_OPTIONS}
+              onChange={(v) => set('finishLength', v)}
+            />
+            <Field label="여운 설명">
               <Input
                 value={form.finish}
                 onChange={handleText('finish')}
                 placeholder="긴 여운, 탄닌의 부드러운 마무리"
+              />
+            </Field>
+          </div>
+        </section>
+
+        {/* 구조감 */}
+        <section>
+          <SectionTitle>구조감 (Structure)</SectionTitle>
+          <div className="space-y-4">
+            <ScaleSelect
+              label="당도 (Sweetness)"
+              value={form.sweetness}
+              options={SWEETNESS_OPTIONS}
+              onChange={(v) => set('sweetness', v)}
+            />
+            <ScaleSelect
+              label="산도 (Acidity)"
+              value={form.acidity}
+              options={ACIDITY_OPTIONS}
+              onChange={(v) => set('acidity', v)}
+            />
+            <ScaleSelect
+              label="타닌 (Tannin)"
+              value={form.tannin}
+              options={TANNIN_OPTIONS}
+              onChange={(v) => set('tannin', v)}
+            />
+            <ScaleSelect
+              label="알코올 레벨 (Alcohol)"
+              value={form.alcoholLevel}
+              options={ALCOHOL_OPTIONS}
+              onChange={(v) => set('alcoholLevel', v)}
+            />
+            <ScaleSelect
+              label="바디 (Body)"
+              value={form.body}
+              options={BODY_OPTIONS}
+              onChange={(v) => set('body', v)}
+            />
+            <ScaleSelect
+              label="풍미 강도 (Flavour Intensity)"
+              value={form.flavourIntensity}
+              options={FLAVOUR_INTENSITY_OPTIONS}
+              onChange={(v) => set('flavourIntensity', v)}
+            />
+          </div>
+        </section>
+
+        {/* 종합 평가 */}
+        <section>
+          <SectionTitle>종합 평가</SectionTitle>
+          <div className="space-y-4">
+            <ScaleSelect
+              label="품질 (Quality)"
+              value={form.quality}
+              options={QUALITY_OPTIONS}
+              onChange={(v) => set('quality', v)}
+            />
+            <Field label="숙성 가능성">
+              <Input
+                value={form.ageing}
+                onChange={handleText('ageing')}
+                placeholder="5-10년, 지금 마셔도 좋음"
               />
             </Field>
           </div>

@@ -1,5 +1,16 @@
 export type WineColor = 'red' | 'white' | 'rosé' | 'sparkling' | 'dessert' | 'fortified' | 'orange';
 
+export type AppearanceIntensity = 'pale' | 'medium' | 'deep';
+export type NoseIntensity = 'light' | 'medium' | 'pronounced';
+export type Sweetness = 'dry' | 'off-dry' | 'medium-dry' | 'medium-sweet' | 'sweet' | 'luscious';
+export type Acidity = 'low' | 'medium' | 'high';
+export type Tannin = 'low' | 'medium' | 'high';
+export type AlcoholLevel = 'low' | 'medium' | 'high';
+export type Body = 'light' | 'medium' | 'full';
+export type FlavourIntensity = 'light' | 'medium' | 'pronounced';
+export type FinishLength = 'short' | 'medium' | 'long';
+export type Quality = 'acceptable' | 'good' | 'very-good' | 'outstanding';
+
 export interface WineNote {
   id: number;
   // 기본 정보
@@ -10,11 +21,28 @@ export interface WineNote {
   region: string;
   country: string;
   grape: string[];
-  // 테이스팅 노트
+  abv: number | null;
+  // 외관
   appearance: string;
+  appearanceIntensity: AppearanceIntensity | '';
+  appearanceColor: string;
+  // 향
+  noseIntensity: NoseIntensity | '';
   nose: string[];
+  // 구조감
+  sweetness: Sweetness | '';
+  acidity: Acidity | '';
+  tannin: Tannin | '';
+  alcoholLevel: AlcoholLevel | '';
+  body: Body | '';
+  flavourIntensity: FlavourIntensity | '';
   palate: string[];
+  // 여운
+  finishLength: FinishLength | '';
   finish: string;
+  // 종합
+  quality: Quality | '';
+  ageing: string;
   // 평점
   myRating: number;
   vivinoRating: string;
@@ -66,12 +94,8 @@ export const NOSE_DESCRIPTORS = [
 ];
 
 export const PALATE_DESCRIPTORS = [
-  '드라이', '스위트', '오프드라이',
-  '라이트 바디', '미디엄 바디', '풀 바디',
-  '낮은 산도', '중간 산도', '높은 산도', '생기있는',
-  '부드러운 탄닌', '실키한 탄닌', '탄탄한 탄닌', '거친 탄닌',
-  '짧은 피니시', '중간 피니시', '긴 피니시',
-  '균형잡힌', '복합적인', '우아한', '강렬한',
+  '균형잡힌', '복합적인', '우아한', '강렬한', '미네랄', '과실향',
+  '스파이시', '흙냄새', '오크', '크리미', '신선한', '농밀한',
 ];
 
 export const FOOD_PAIRING_OPTIONS = [
@@ -83,3 +107,75 @@ export const FOOD_PAIRING_OPTIONS = [
   '샐러드', '채소', '버섯', '트러플',
   '스시', '회', '한식',
 ];
+
+// 구조감 선택지 정의
+export const APPEARANCE_INTENSITY_OPTIONS: { value: AppearanceIntensity; label: string }[] = [
+  { value: 'pale', label: 'Pale' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'deep', label: 'Deep' },
+];
+
+export const NOSE_INTENSITY_OPTIONS: { value: NoseIntensity; label: string }[] = [
+  { value: 'light', label: 'Light' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'pronounced', label: 'Pronounced' },
+];
+
+export const SWEETNESS_OPTIONS: { value: Sweetness; label: string }[] = [
+  { value: 'dry', label: 'Dry' },
+  { value: 'off-dry', label: 'Off-dry' },
+  { value: 'medium-dry', label: 'Med. Dry' },
+  { value: 'medium-sweet', label: 'Med. Sweet' },
+  { value: 'sweet', label: 'Sweet' },
+  { value: 'luscious', label: 'Luscious' },
+];
+
+export const ACIDITY_OPTIONS: { value: Acidity; label: string }[] = [
+  { value: 'low', label: 'Low' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'high', label: 'High' },
+];
+
+export const TANNIN_OPTIONS: { value: Tannin; label: string }[] = [
+  { value: 'low', label: 'Low' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'high', label: 'High' },
+];
+
+export const ALCOHOL_OPTIONS: { value: AlcoholLevel; label: string }[] = [
+  { value: 'low', label: 'Low' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'high', label: 'High' },
+];
+
+export const BODY_OPTIONS: { value: Body; label: string }[] = [
+  { value: 'light', label: 'Light' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'full', label: 'Full' },
+];
+
+export const FLAVOUR_INTENSITY_OPTIONS: { value: FlavourIntensity; label: string }[] = [
+  { value: 'light', label: 'Light' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'pronounced', label: 'Pronounced' },
+];
+
+export const FINISH_LENGTH_OPTIONS: { value: FinishLength; label: string }[] = [
+  { value: 'short', label: 'Short' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'long', label: 'Long' },
+];
+
+export const QUALITY_OPTIONS: { value: Quality; label: string }[] = [
+  { value: 'acceptable', label: 'Acceptable' },
+  { value: 'good', label: 'Good' },
+  { value: 'very-good', label: 'Very Good' },
+  { value: 'outstanding', label: 'Outstanding' },
+];
+
+export const QUALITY_LABELS: Record<Quality, string> = {
+  acceptable: 'Acceptable',
+  good: 'Good',
+  'very-good': 'Very Good',
+  outstanding: 'Outstanding',
+};

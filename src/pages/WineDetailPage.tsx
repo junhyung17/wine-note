@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeftIcon, PencilIcon, TrashIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
-import { type WineNote } from '../types/wine';
+import {
+  type WineNote,
+  SWEETNESS_OPTIONS, ACIDITY_OPTIONS, TANNIN_OPTIONS, ALCOHOL_OPTIONS,
+  BODY_OPTIONS, FLAVOUR_INTENSITY_OPTIONS, QUALITY_OPTIONS,
+} from '../types/wine';
 import { fetchWine, deleteWine } from '../api/wineApi';
 import WineColorBadge from '../components/WineColorBadge';
 import StarRating from '../components/StarRating';
@@ -37,6 +41,37 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
     <h2 className="text-sm font-semibold text-[#d4af6a] border-b border-[#2a1520] pb-2 mb-3">
       {children}
     </h2>
+  );
+}
+
+function ScaleRow<T extends string>({
+  label,
+  value,
+  options,
+}: {
+  label: string;
+  value: T | '';
+  options: { value: T; label: string }[];
+}) {
+  if (!value) return null;
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-xs text-gray-500 w-28 shrink-0">{label}</span>
+      <div className="flex gap-1.5">
+        {options.map((opt) => (
+          <span
+            key={opt.value}
+            className={`text-xs px-2 py-1 rounded-md border transition-all ${
+              opt.value === value
+                ? 'bg-[#8f1c39] text-white border-[#cc2a4e]'
+                : 'bg-[#0f0a0c] text-gray-600 border-[#2a1520]'
+            }`}
+          >
+            {opt.label}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -76,6 +111,16 @@ export default function WineDetailPage() {
     if (currency === 'JPY') return `¥${num.toLocaleString()}`;
     return price;
   }
+
+  const hasStructure = wine.sweetness || wine.acidity || wine.tannin || wine.alcoholLevel || wine.body || wine.flavourIntensity;
+  const hasAppearanceDetail = wine.appearanceIntensity || wine.appearanceColor || wine.appearance;
+  const hasNose = wine.noseIntensity || wine.nose.length > 0;
+  const hasTasting = hasAppearanceDetail || hasNose || wine.palate.length > 0 || wine.finish || wine.finishLength;
+  const hasQuality = wine.quality || wine.ageing;
+
+  const qualityLabel = wine.quality
+    ? QUALITY_OPTIONS.find((q) => q.value === wine.quality)?.label
+    : undefined;
 
   return (
     <div className="min-h-screen bg-[#0f0a0c]">
@@ -160,9 +205,104 @@ export default function WineDetailPage() {
             <InfoItem label="국가" value={wine.country} />
             <InfoItem label="지역" value={wine.region} />
             <InfoItem label="포도 품종" value={wine.grape.join(', ')} />
+            {wine.abv != null && <InfoItem label="알코올 도수" value={`${wine.abv}%`} />}
             <InfoItem label="시음일" value={wine.dateTasted ? new Date(wine.dateTasted).toLocaleDateString('ko-KR') : undefined} />
           </dl>
         </section>
+
+        {/* 테이스팅 노트 */}
+        {hasTasting && (
+          <section className="bg-[#140c0f] border border-[#2a1520] rounded-xl p-4 space-y-4">
+            <SectionTitle>테이스팅 노트</SectionTitle>
+
+            {hasAppearanceDetail && (
+              <div className="space-y-2">
+                <p className="text-xs text-gray-500">외관</p>
+                {wine.appearanceIntensity && (
+                  <span className="inline-block text-xs px-2.5 py-1 rounded-md bg-[#1a0f13] border border-[#3d1f2a] text-gray-300 mr-2">
+                    강도: {wine.appearanceIntensity}
+                  </span>
+                )}
+                {wine.appearanceColor && (
+                  <span className="inline-block text-xs px-2.5 py-1 rounded-md bg-[#1a0f13] border border-[#3d1f2a] text-gray-300 mr-2">
+                    {wine.appearanceColor}
+                  </span>
+                )}
+                {wine.appearance && <p className="text-sm text-white mt-1">{wine.appearance}</p>}
+              </div>
+            )}
+
+            {hasNose && (
+              <div className="space-y-2">
+                <p className="text-xs text-gray-500">향 (아로마/부케)</p>
+                {wine.noseIntensity && (
+                  <span className="inline-block text-xs px-2.5 py-1 rounded-md bg-[#1a0f13] border border-[#3d1f2a] text-gray-300 mr-2">
+                    강도: {wine.noseIntensity}
+                  </span>
+                )}
+                {wine.nose.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {wine.nose.map((t) => (
+                      <span key={t} className="bg-[#1a0f13] border border-[#3d1f2a] text-gray-300 text-xs rounded-md px-2.5 py-1">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <TagList tags={wine.palate} label="맛 (팔레트)" />
+
+            {(wine.finish || wine.finishLength) && (
+              <div className="space-y-1">
+                <p className="text-xs text-gray-500">여운</p>
+                {wine.finishLength && (
+                  <span className="inline-block text-xs px-2.5 py-1 rounded-md bg-[#1a0f13] border border-[#3d1f2a] text-gray-300 mr-2">
+                    {wine.finishLength}
+                  </span>
+                )}
+                {wine.finish && <p className="text-sm text-white mt-1">{wine.finish}</p>}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* 구조감 */}
+        {hasStructure && (
+          <section className="bg-[#140c0f] border border-[#2a1520] rounded-xl p-4">
+            <SectionTitle>구조감 (Structure)</SectionTitle>
+            <div className="space-y-3">
+              <ScaleRow label="당도" value={wine.sweetness} options={SWEETNESS_OPTIONS} />
+              <ScaleRow label="산도" value={wine.acidity} options={ACIDITY_OPTIONS} />
+              <ScaleRow label="타닌" value={wine.tannin} options={TANNIN_OPTIONS} />
+              <ScaleRow label="알코올" value={wine.alcoholLevel} options={ALCOHOL_OPTIONS} />
+              <ScaleRow label="바디" value={wine.body} options={BODY_OPTIONS} />
+              <ScaleRow label="풍미 강도" value={wine.flavourIntensity} options={FLAVOUR_INTENSITY_OPTIONS} />
+            </div>
+          </section>
+        )}
+
+        {/* 종합 평가 */}
+        {hasQuality && (
+          <section className="bg-[#140c0f] border border-[#2a1520] rounded-xl p-4">
+            <SectionTitle>종합 평가</SectionTitle>
+            <div className="space-y-3">
+              {qualityLabel && (
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-gray-500 w-28 shrink-0">품질</span>
+                  <span className="text-sm font-semibold text-[#d4af6a]">{qualityLabel}</span>
+                </div>
+              )}
+              {wine.ageing && (
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-gray-500 w-28 shrink-0">숙성 가능성</span>
+                  <span className="text-sm text-white">{wine.ageing}</span>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* 평점 */}
         <section className="bg-[#140c0f] border border-[#2a1520] rounded-xl p-4">
@@ -187,21 +327,6 @@ export default function WineDetailPage() {
             )}
           </div>
         </section>
-
-        {/* 테이스팅 노트 */}
-        {(wine.appearance || wine.nose.length > 0 || wine.palate.length > 0 || wine.finish) && (
-          <section className="bg-[#140c0f] border border-[#2a1520] rounded-xl p-4 space-y-4">
-            <SectionTitle>테이스팅 노트</SectionTitle>
-            {wine.appearance && (
-              <InfoItem label="외관" value={wine.appearance} />
-            )}
-            <TagList tags={wine.nose} label="향 (아로마/부케)" />
-            <TagList tags={wine.palate} label="맛 (팔레트)" />
-            {wine.finish && (
-              <InfoItem label="피니시" value={wine.finish} />
-            )}
-          </section>
-        )}
 
         {/* 가격 & 구매 */}
         {(wine.price || wine.purchaseLocation || wine.wineSearcherPrice) && (
