@@ -9,7 +9,6 @@ import {
   FLAVOUR_INTENSITY_OPTIONS, FINISH_LENGTH_OPTIONS, QUALITY_OPTIONS,
 } from '../types/wine';
 import { createWine, updateWine, fetchWine } from '../api/wineApi';
-import StarRating from '../components/StarRating';
 import TagInput from '../components/TagInput';
 import GrapeInput from '../components/GrapeInput';
 import PhotoUpload from '../components/PhotoUpload';
@@ -67,6 +66,44 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
     <h2 className="text-base font-semibold text-[#d4af6a] border-b border-[#2a1520] pb-2 mb-4">
       {children}
     </h2>
+  );
+}
+
+function ScoreInput({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  const adj = (delta: number) => {
+    const next = Math.round((value + delta) * 10) / 10;
+    onChange(Math.min(10, Math.max(0, next)));
+  };
+  const stars = value > 0 ? (value / 2).toFixed(2).replace(/\.?0+$/, '') : null;
+
+  return (
+    <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex items-center bg-[#1a0f13] border border-[#3d1f2a] rounded-lg overflow-hidden">
+        <button type="button" onClick={() => adj(-0.1)}
+          className="px-3 py-2.5 text-gray-400 hover:text-white hover:bg-[#2a1520] transition-colors select-none">
+          −
+        </button>
+        <input
+          type="number"
+          value={value || ''}
+          onChange={(e) => {
+            const v = Math.round(Number(e.target.value) * 10) / 10;
+            onChange(isNaN(v) ? 0 : Math.min(10, Math.max(0, v)));
+          }}
+          min="0" max="10" step="0.1"
+          placeholder="0"
+          className="w-14 bg-transparent text-white text-center text-sm focus:outline-none py-2.5"
+        />
+        <button type="button" onClick={() => adj(0.1)}
+          className="px-3 py-2.5 text-gray-400 hover:text-white hover:bg-[#2a1520] transition-colors select-none">
+          +
+        </button>
+      </div>
+      <span className="text-gray-500 text-sm">/ 10점</span>
+      {stars && (
+        <span className="text-[#d4af6a] text-sm">★ {stars} / 5.0</span>
+      )}
+    </div>
   );
 }
 
@@ -402,7 +439,7 @@ export default function WineFormPage() {
           <SectionTitle>평점 & 가격</SectionTitle>
           <div className="space-y-4">
             <Field label="내 평점">
-              <StarRating value={form.myRating} onChange={(v) => set('myRating', v)} size="lg" />
+              <ScoreInput value={form.myRating} onChange={(v) => set('myRating', v)} />
             </Field>
 
             <div className="grid grid-cols-2 gap-4">

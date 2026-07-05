@@ -8,7 +8,6 @@ import {
 } from '../types/wine';
 import { fetchWine, deleteWine } from '../api/wineApi';
 import WineColorBadge from '../components/WineColorBadge';
-import StarRating from '../components/StarRating';
 
 function InfoItem({ label, value }: { label: string; value: string | number | undefined }) {
   if (!value && value !== 0) return null;
@@ -311,7 +310,16 @@ export default function WineDetailPage() {
             <div>
               <p className="text-xs text-gray-500 mb-1.5">내 평점</p>
               {wine.myRating > 0 ? (
-                <StarRating value={wine.myRating} readonly size="lg" />
+                <div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-3xl font-bold text-[#d4af6a]">{wine.myRating}</span>
+                    <span className="text-gray-500 text-sm">/ 10점</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {'★'.repeat(Math.round(wine.myRating / 2))}{'☆'.repeat(5 - Math.round(wine.myRating / 2))}
+                    {' '}{(wine.myRating / 2).toFixed(2).replace(/\.?0+$/, '')} / 5.0
+                  </p>
+                </div>
               ) : (
                 <span className="text-gray-600 text-sm">미평가</span>
               )}

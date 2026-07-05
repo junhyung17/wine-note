@@ -24,17 +24,9 @@ class WineNoteSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'updated_at']
 
     def validate_my_rating(self, value):
-        """
-        역할: my_rating 값의 유효성 검사
-              0~5 사이의 0.5 단위 값만 허용
-        입력: value (float) - API에서 받은 평점 값
-        출력: 유효한 값 반환 또는 ValidationError 발생
-        """
-        if value < 0 or value > 5:
-            raise serializers.ValidationError("평점은 0에서 5 사이여야 합니다.")
-        # 0.5 단위로 반올림 (예: 3.7 → 3.5)
-        value = round(value * 2) / 2
-        return value
+        if value < 0 or value > 10:
+            raise serializers.ValidationError("평점은 0에서 10 사이여야 합니다.")
+        return round(value * 10) / 10
 
     def validate_nose(self, value):
         """

@@ -141,8 +141,8 @@ class WineNote(models.Model):
     my_rating = models.FloatField(
         default=0,
         validators=[
-            MinValueValidator(0.0),    # 최소 0점
-            MaxValueValidator(5.0),    # 최대 5점
+            MinValueValidator(0.0),
+            MaxValueValidator(10.0),
         ],
         verbose_name='내 평점',
     )

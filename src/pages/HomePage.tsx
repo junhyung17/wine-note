@@ -5,7 +5,6 @@ import { type WineNote, type WineColor, COLOR_LABELS } from '../types/wine';
 import { getWines } from '../store/wineStore';
 import { useAuth } from '../context/AuthContext';
 import WineColorBadge from '../components/WineColorBadge';
-import StarRating from '../components/StarRating';
 
 type ViewMode = 'grid' | 'list';
 const ALL_COLORS: (WineColor | 'all')[] = ['all', 'red', 'white', 'rosé', 'sparkling', 'orange', 'dessert', 'fortified'];
@@ -61,7 +60,7 @@ function WineCard({ wine, onClick }: { wine: WineNote; onClick: () => void }) {
 
         <div className="flex items-center justify-between">
           {wine.myRating > 0 ? (
-            <StarRating value={wine.myRating} readonly size="sm" />
+            <span className="text-sm font-semibold text-[#d4af6a]">{wine.myRating}<span className="text-xs font-normal text-gray-500"> / 10</span></span>
           ) : (
             <span className="text-xs text-gray-600">미평가</span>
           )}
@@ -106,7 +105,9 @@ function WineRow({ wine, onClick }: { wine: WineNote; onClick: () => void }) {
       </div>
 
       <div className="flex flex-col items-end gap-1 flex-shrink-0">
-        {wine.myRating > 0 && <StarRating value={wine.myRating} readonly size="sm" />}
+        {wine.myRating > 0 && (
+          <span className="text-sm font-semibold text-[#d4af6a]">{wine.myRating}<span className="text-xs font-normal text-gray-500"> / 10</span></span>
+        )}
         {wine.price && (
           <span className="text-xs text-[#d4af6a]">{formatPrice(wine.price, wine.currency)}</span>
         )}
