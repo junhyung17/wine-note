@@ -7,7 +7,7 @@
 """
 import logging
 from rest_framework import serializers
-from .models import WineNote
+from .models import WineNote, WineCatalog
 
 logger = logging.getLogger(__name__)
 
@@ -85,3 +85,9 @@ class WineNoteListSerializer(serializers.ModelSerializer):
             'date_tasted',
             'created_at',
         ]
+
+
+class WineCatalogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WineCatalog
+        fields = ['id', 'producer', 'name', 'country', 'region', 'grapes']

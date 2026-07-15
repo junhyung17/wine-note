@@ -97,7 +97,7 @@ function WineRow({ wine, onClick }: { wine: WineNote; onClick: () => void }) {
         </div>
         <p className="text-xs text-gray-500 mt-0.5">
           {[wine.country, wine.region].filter(Boolean).join(' · ')}
-          {wine.grape.length > 0 && ` · ${wine.grape.join(', ')}`}
+          {wine.grape.length > 0 && ` · ${wine.grape.map(g => g.name).join(', ')}`}
         </p>
         {wine.nose.length > 0 && (
           <p className="text-xs text-gray-600 mt-0.5 truncate">{wine.nose.join(', ')}</p>
@@ -152,7 +152,7 @@ export default function HomePage() {
           w.producer.toLowerCase().includes(q) ||
           w.region.toLowerCase().includes(q) ||
           w.country.toLowerCase().includes(q) ||
-          w.grape.some((g) => g.toLowerCase().includes(q))
+          w.grape.some((g) => g.name.toLowerCase().includes(q))
         );
       })
     : wines;

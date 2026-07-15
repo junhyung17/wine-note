@@ -203,10 +203,25 @@ export default function WineDetailPage() {
           <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
             <InfoItem label="국가" value={wine.country} />
             <InfoItem label="지역" value={wine.region} />
-            <InfoItem label="포도 품종" value={wine.grape.join(', ')} />
             {wine.abv != null && <InfoItem label="알코올 도수" value={`${wine.abv}%`} />}
             <InfoItem label="시음일" value={wine.dateTasted ? new Date(wine.dateTasted).toLocaleDateString('ko-KR') : undefined} />
           </dl>
+
+          {wine.grape.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-[#2a1520]">
+              <p className="text-xs text-gray-500 mb-2">포도 품종</p>
+              <div className="flex flex-wrap gap-2">
+                {wine.grape.map((g, i) => (
+                  <span key={i} className="inline-flex items-center gap-1.5 bg-[#1a0f13] border border-[#3d1f2a] rounded-md px-2.5 py-1">
+                    <span className="text-sm text-white">{g.name}</span>
+                    {g.percentage != null && (
+                      <span className="text-xs text-[#d4af6a] font-medium">{g.percentage}%</span>
+                    )}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </section>
 
         {/* 테이스팅 노트 */}

@@ -8,9 +8,10 @@ import {
   ACIDITY_OPTIONS, TANNIN_OPTIONS, ALCOHOL_OPTIONS, BODY_OPTIONS,
   FLAVOUR_INTENSITY_OPTIONS, FINISH_LENGTH_OPTIONS, QUALITY_OPTIONS,
 } from '../types/wine';
-import { createWine, updateWine, fetchWine } from '../api/wineApi';
+import { createWine, updateWine, fetchWine, type WineCatalogEntry } from '../api/wineApi';
 import TagInput from '../components/TagInput';
-import GrapeInput from '../components/GrapeInput';
+import GrapeBlendInput from '../components/GrapeBlendInput';
+import WineSearchAutocomplete from '../components/WineSearchAutocomplete';
 import PhotoUpload from '../components/PhotoUpload';
 
 const COLORS: WineColor[] = ['red', 'white', 'rosé', 'sparkling', 'orange', 'dessert', 'fortified'];
@@ -148,6 +149,17 @@ export default function WineFormPage() {
   const [form, setForm] = useState<WineFormData>(defaultForm);
   const [saving, setSaving] = useState(false);
 
+  function handleCatalogSelect(entry: WineCatalogEntry) {
+    setForm((prev) => ({
+      ...prev,
+      producer: entry.producer,
+      name: entry.name,
+      country: entry.country,
+      region: entry.region,
+      grape: entry.grapes.map((name) => ({ name, percentage: null })),
+    }));
+  }
+
   useEffect(() => {
     if (id) {
       fetchWine(Number(id))
@@ -212,6 +224,10 @@ export default function WineFormPage() {
         <section>
           <SectionTitle>기본 정보</SectionTitle>
           <div className="space-y-4">
+            <Field label="와인 검색">
+              <WineSearchAutocomplete onSelect={handleCatalogSelect} />
+            </Field>
+
             <Field label="와인 색상">
               <div className="flex flex-wrap gap-2">
                 {COLORS.map((c) => (
@@ -274,12 +290,11 @@ export default function WineFormPage() {
               </Field>
             </div>
 
-            <Field label="포도 품종">
-              <GrapeInput
+            <Field label="포도 품종 & 블렌딩 비율">
+              <GrapeBlendInput
                 grapes={form.grape}
                 onChange={(grapes) => set('grape', grapes)}
                 wineColor={form.color}
-                country={form.country}
               />
             </Field>
 

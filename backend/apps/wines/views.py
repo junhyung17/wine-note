@@ -15,8 +15,8 @@ import logging
 from rest_framework import generics, status, filters
 from rest_framework.response import Response
 from django.db.models import Q
-from .models import WineNote
-from .serializers import WineNoteSerializer, WineNoteListSerializer
+from .models import WineNote, WineCatalog
+from .serializers import WineNoteSerializer, WineNoteListSerializer, WineCatalogSerializer
 
 # 이 모듈의 로거
 logger = logging.getLogger(__name__)
@@ -121,3 +121,16 @@ class WineNoteDetailView(generics.RetrieveUpdateDestroyAPIView):
         response = super().destroy(request, *args, **kwargs)
         logger.info(f"와인 노트 삭제 완료 ID: {pk}")
         return response
+
+
+class WineCatalogSearchView(generics.ListAPIView):
+    """GET /api/wines/catalog/?q=chateau+margaux → 와인 카탈로그 검색"""
+    serializer_class = WineCatalogSerializer
+
+    def get_queryset(self):
+        q = self.request.query_params.get('q', '').strip()
+        if len(q) < 2:
+            return WineCatalog.objects.none()
+        return WineCatalog.objects.filter(
+            Q(producer__icontains=q) | Q(name__icontains=q)
+        ).order_by('producer', 'name')[:12]

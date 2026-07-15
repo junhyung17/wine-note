@@ -95,10 +95,9 @@ class WineNote(models.Model):
         verbose_name='국가',
     )
 
-    # 포도 품종 (예: Cabernet Sauvignon, Pinot Noir, Chardonnay)
-    grape = models.CharField(
-        max_length=200,
-        blank=True,
+    # 포도 품종 블렌딩 [{name, percentage}]
+    grape = models.JSONField(
+        default=list,
         verbose_name='포도 품종',
     )
 
@@ -317,3 +316,19 @@ class WineNote(models.Model):
         """삭제 시 로그 기록"""
         logger.info(f"와인 노트 삭제: {self} (ID: {self.pk})")
         super().delete(*args, **kwargs)
+
+
+class WineCatalog(models.Model):
+    """와인 카탈로그 (자동완성용 참조 DB)"""
+    producer = models.CharField(max_length=200, db_index=True)
+    name = models.CharField(max_length=300, db_index=True)
+    country = models.CharField(max_length=100, blank=True)
+    region = models.CharField(max_length=200, blank=True)
+    grapes = models.JSONField(default=list)  # ["Cabernet Sauvignon", "Merlot"]
+
+    class Meta:
+        verbose_name = '와인 카탈로그'
+        indexes = [models.Index(fields=['producer', 'name'])]
+
+    def __str__(self):
+        return f"{self.producer} - {self.name}"

@@ -1,4 +1,13 @@
-import { type WineNote, type WineFormData } from '../types/wine';
+import { type WineNote, type WineFormData, type GrapeBlend } from '../types/wine';
+
+export interface WineCatalogEntry {
+  id: number;
+  producer: string;
+  name: string;
+  country: string;
+  region: string;
+  grapes: string[];
+}
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
@@ -10,7 +19,7 @@ interface ApiWine {
   color: string;
   region: string;
   country: string;
-  grape: string;
+  grape: { name: string; percentage: number | null }[];
   abv: number | null;
   appearance: string;
   appearance_intensity: string;
@@ -51,7 +60,7 @@ function fromApi(d: ApiWine): WineNote {
     color: (d.color ?? 'red') as WineNote['color'],
     region: d.region ?? '',
     country: d.country ?? '',
-    grape: (d.grape ?? '').split(',').map((s) => s.trim()).filter(Boolean),
+    grape: (d.grape ?? []) as GrapeBlend[],
     abv: d.abv ?? null,
     appearance: d.appearance ?? '',
     appearanceIntensity: (d.appearance_intensity ?? '') as WineNote['appearanceIntensity'],
@@ -92,7 +101,7 @@ function toApi(d: WineFormData): Record<string, unknown> {
     color: d.color,
     region: d.region,
     country: d.country,
-    grape: d.grape.join(', '),
+    grape: d.grape,
     abv: d.abv,
     appearance: d.appearance,
     appearance_intensity: d.appearanceIntensity,
@@ -159,4 +168,12 @@ export async function updateWine(id: number, formData: WineFormData): Promise<Wi
 
 export async function deleteWine(id: number): Promise<void> {
   await request<void>(`${API_BASE}/api/wines/${id}/`, { method: 'DELETE' });
+}
+
+export async function searchWineCatalog(q: string): Promise<WineCatalogEntry[]> {
+  if (q.trim().length < 2) return [];
+  const data = await request<{ results?: WineCatalogEntry[] } | WineCatalogEntry[]>(
+    `${API_BASE}/api/wines/catalog/?q=${encodeURIComponent(q)}`
+  );
+  return Array.isArray(data) ? data : (data.results ?? []);
 }

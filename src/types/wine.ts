@@ -1,5 +1,10 @@
 export type WineColor = 'red' | 'white' | 'rosé' | 'sparkling' | 'dessert' | 'fortified' | 'orange';
 
+export interface GrapeBlend {
+  name: string;
+  percentage: number | null;
+}
+
 export type AppearanceIntensity = 'pale' | 'medium' | 'deep';
 export type NoseIntensity = 'light' | 'medium' | 'pronounced';
 export type Sweetness = 'dry' | 'off-dry' | 'medium-dry' | 'medium-sweet' | 'sweet' | 'luscious';
@@ -20,7 +25,7 @@ export interface WineNote {
   color: WineColor;
   region: string;
   country: string;
-  grape: string[];
+  grape: GrapeBlend[];
   abv: number | null;
   // 외관
   appearance: string;
